@@ -351,26 +351,28 @@ class _ScanPageState extends State<ScanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 120,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: AppColors.defaultGradient,
-            ),
-          ),
-          child: const Center(
-            child: Text(
-              "Capture or Upload!",
-              style: TextStyle(
-                color: Colors.grey,
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
+      appBar: _isCameraViewVisible
+          ? null
+          : AppBar(
+              toolbarHeight: 120,
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: AppColors.defaultGradient,
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Capture or Upload!",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ),
       body: Center(
         child: isLoading
             ? const CircularProgressIndicator()
