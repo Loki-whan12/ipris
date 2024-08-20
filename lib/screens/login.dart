@@ -1,12 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive/hive.dart';
 import 'package:ipris/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../resources/resources.dart';
 import '../services/backen_services.dart';
 import '../utils/common_widgets/gradient_background.dart';
 import '../values/app_strings.dart';
@@ -116,7 +114,7 @@ class _LoginState extends State<Login> {
           .catchError((error) {
         setState(() {
           loading = false;
-          showErrorMessage('An error occurred. Please try again.');
+          showErrorMessage('An error occurred. Please try again. $error');
         });
       });
     }

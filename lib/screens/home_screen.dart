@@ -33,8 +33,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late String _initials = '';
   late String _username = '';
+  late String _email = '';
+  late String _name = '';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<bool> isLoadingList = [false, false, false];
+  bool _isDropdownVisible = false;
+
+  void _toggleDropdown() {
+    setState(() {
+      _isDropdownVisible = !_isDropdownVisible;
+    });
+  }
 
   @override
   void initState() {
@@ -83,7 +92,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     setState(() {
       _initials = temp;
-      _username = name;
+      _username = updateAppProps['userInfo']['username'].toString();
+      _email = updateAppProps['userInfo']['email'].toString();
+      _name = name;
     });
   }
 
@@ -96,7 +107,11 @@ class _HomeScreenState extends State<HomeScreen> {
             pageName: 'IPRIS',
           ),
         ),
-        actions: [InitialsAvatar(initials: _initials)],
+        actions: [
+          GestureDetector(
+              onTap: _toggleDropdown,
+              child: InitialsAvatar(initials: _initials))
+        ],
       ),
       drawer: MyDrawer(
         currentDrawerItem: 0,
@@ -105,25 +120,72 @@ class _HomeScreenState extends State<HomeScreen> {
         box: widget.box,
       ),
       key: _scaffoldKey,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            HomeScreenHeader(username: _username),
-            const Divider(),
-            myHeightSpacer(20),
-            titleForSubComponents("Discover the app..."),
-            myHeightSpacer(10),
-            myCarouselSlider(),
-            myHeightSpacer(25),
-            const Divider(),
-            myHeightSpacer(15),
-            titleForSubComponents("Discover featured plants from us"),
-            myHeightSpacer(15),
-            featuredCards(context, widget.box, widget.currentTheme,
-                widget.onThemeChanged),
-          ],
-        ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                HomeScreenHeader(username: _name),
+                const Divider(),
+                myHeightSpacer(20),
+                titleForSubComponents("Discover the app..."),
+                myHeightSpacer(10),
+                myCarouselSlider(),
+                myHeightSpacer(25),
+                const Divider(),
+                myHeightSpacer(15),
+                titleForSubComponents("Discover featured plants from us"),
+                myHeightSpacer(15),
+                featuredCards(
+                  context,
+                  widget.box,
+                  widget.currentTheme,
+                  widget.onThemeChanged,
+                ),
+              ],
+            ),
+          ),
+          if (_isDropdownVisible)
+            Positioned(
+              top: 5, // Position it just below the AppBar
+              right: 16.0,
+              child: Material(
+                elevation: 4.0,
+                borderRadius: BorderRadius.circular(8.0),
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircleAvatar(
+                        backgroundImage:
+                            AssetImage('assets/imgs/plant-six.jpg'),
+                        radius: 20.0,
+                      ),
+                      const SizedBox(width: 10.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_name,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(_email),
+                          Text(_username,
+                              style:
+                                  const TextStyle(fontStyle: FontStyle.italic)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
       floatingActionButton: floatingActionButtonForScanPage(
           context, widget.currentTheme, widget.onThemeChanged, widget.box),
