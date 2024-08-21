@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
+import '../../services/backen_services.dart';
 import '../../services/plant_api_service.dart';
 import 'scan_upload.dart';
 
@@ -155,7 +156,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     var username = updateAppProps['userInfo']['username'].toString();
 
     try {
-      await UploadApiImage().uploadImageAndResultsInfoToDatabase(
+      await MyBackendService().uploadImageAndResultsInfoToDatabase(
         "filename.jpg",
         widget.imageBytes,
         plantInfo,
