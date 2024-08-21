@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 class MyBackendService {
-  final link = "http://172.20.10.2:5000";
+  final link = "https://ipris-backend.onrender.com";
   final headers = {'Content-Type': 'application/json'};
 
   Future<dynamic> getUserInfo(String username) async {
