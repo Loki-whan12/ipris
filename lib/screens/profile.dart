@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../componenets/drawer.dart';
 import 'history.dart';
@@ -122,9 +123,14 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
     var box = widget.box;
+
     Map updateAppProps = box.get("appProps");
     updateAppProps['isLoggedIn'] = false;
+    await widget.box.put('isLoggedIn', false);
+    prefs.setBool('isLoggedIn', false);
+
     await box.put('appProps', updateAppProps).whenComplete(() {
       Navigator.pushReplacement(
           context,
