@@ -22,7 +22,7 @@ class MyBackendService {
 
   Future<dynamic> identifyPlant(Uint8List bytes, String filename) async {
     var headers = {
-      'Api-Key': 'nnzZn3wOmR6ADC3MaPtS36rBRYAOmvXHFPFjGRAy8wvqS3nVlE',
+      'Api-Key': 'NVOQ06FFhwbHBjlEi54WjwcJA2wXKL2w5ygGyuGVxrfQ1MAbkF',
       'Content-Type': 'multipart/form-data'
     };
     var request = http.MultipartRequest(

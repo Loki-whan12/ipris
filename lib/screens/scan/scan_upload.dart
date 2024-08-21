@@ -178,6 +178,7 @@ class _ScanPageState extends State<ScanPage> {
           setState(() {
             isLoading = false;
           });
+          print(response['plant_uses']);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -221,7 +222,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> pickDefaultImage(BuildContext context) async {
-    const imagePath = 'assets/imgs/imgss.jpg';
+    const imagePath = 'assets/imgs/eor.jpg';
     final bytes = await rootBundle.load(imagePath);
     handleImage(bytes.buffer.asUint8List(), context);
   }

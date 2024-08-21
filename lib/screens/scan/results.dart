@@ -66,7 +66,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
       plantUses = widget.plantUses;
       imageBytes = widget.imageBytes;
       var suggestion = plantInfo['result']['classification']['suggestions'];
-
       commonName =
           suggestion?[0]?['details']?['common_names']?[0]?.toString() ?? "";
       scientificName = suggestion[0]?['name'].toString() ?? "";
@@ -95,7 +94,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ['details']['description']
             .toString();
       }
-
       edibleParts = plantUses['Edible Parts'].toString();
       edibleUses = plantUses['Edible Uses'].toString();
       medicalUses = plantUses['Medicinal Uses'].toString();
@@ -250,13 +248,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
             style: TextStyle(color: textColor, fontSize: 16),
             children: [
               _buildCenteredDescription('Edible Parts:'),
-              _buildCenteredDescription(plantUses['Edible Parts'].join(', ')),
+              _buildCenteredDescription(
+                  (plantUses['Edible Parts'] ?? []).join(', ')),
               _buildCenteredDescription('Edible Uses:'),
-              _buildDescription(plantUses['Edible Uses'].join('. ')),
+              _buildDescription((plantUses['Edible Uses'] ?? []).join('. ')),
               _buildCenteredDescription('Medicinal Uses:'),
-              _buildDescription(plantUses['Medicinal Uses'].join('. ')),
+              _buildDescription((plantUses['Medicinal Uses'] ?? []).join('. ')),
               _buildCenteredDescription('Other Uses:'),
-              _buildDescription(plantUses['Other Uses'].join('. ')),
+              _buildDescription((plantUses['Other Uses'] ?? []).join('. ')),
             ],
           ),
         ),
