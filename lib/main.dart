@@ -1,9 +1,29 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/splash.dart';
 import 'values/app_props.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    if (kIsWeb) {
+      // Initialize Hive for web
+      Hive.init('');
+    } else {
+      // Initialize Hive for mobile
+      final appDocumentDir = await getApplicationDocumentsDirectory();
+      Hive.init(appDocumentDir.path);
+    }
+    Box box = await Hive.openBox("iprisinfo");
+    runApp(MyApp(box: box));
+  } catch (e) {
+    print('Error initializing Hive: $e');
+  }
+}
 
 class MyApp extends StatefulWidget {
   final Box box;
