@@ -189,7 +189,7 @@ class _ScanPageState extends State<ScanPage> {
                 onThemeChanged: widget.onThemeChanged,
                 showButtonsOfScanScreen: true,
                 plantInfo: response['plant_info'],
-                plantUses: response['plant_uses']['plant_uses'],
+                plantUses: response['plant_uses']?['plant_uses'] ?? {},
               ),
             ),
           );
@@ -222,7 +222,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> pickDefaultImage(BuildContext context) async {
-    const imagePath = 'assets/imgs/eor.jpg';
+    const imagePath = 'assets/imgs/imgss.jpg';
     final bytes = await rootBundle.load(imagePath);
     handleImage(bytes.buffer.asUint8List(), context);
   }
