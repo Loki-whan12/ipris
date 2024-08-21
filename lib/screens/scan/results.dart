@@ -269,12 +269,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
         Text('Disease Description: $diseaseDescription'),
         const SizedBox(height: 20),
         if (widget.showButtonsOfScanScreen)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _isSaving
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
+          _isSaving
+              ? const CircularProgressIndicator()
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
                         Navigator.pushReplacement(
@@ -290,14 +290,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       },
                       child: const Text('Identify Again.'),
                     ),
-              _isSaving
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
+                    ElevatedButton(
                       onPressed: _isSaved ? null : _showSaveConfirmationDialog,
                       child: Text(_isSaved ? 'Saved' : 'Save'),
                     ),
-            ],
-          )
+                  ],
+                )
         else
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
