@@ -221,7 +221,11 @@ class _LoginState extends State<Login> {
                       if (value == null || value.isEmpty) {
                         return AppStrings.pleaseEnterPassword;
                       } else if (value.length < 8) {
-                        return "Please password canot be < 8 characters";
+                        return "Password must be at least 8 characters long";
+                      } else if (!RegExp(
+                              r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$')
+                          .hasMatch(value)) {
+                        return "Password must include letters, numbers, and special characters";
                       }
                       return null;
                     },
