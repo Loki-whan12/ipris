@@ -257,7 +257,14 @@ class _LoginState extends State<Login> {
                   (loading)
                       ? const CircularProgressIndicator()
                       : ElevatedButton(
-                          onPressed: proceedWithLogin,
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              proceedWithLogin();
+                            } else {
+                              showErrorMessage(
+                                  'Please fill in all fields correctly.');
+                            }
+                          },
                           child: const Text(AppStrings.login),
                         ),
                   const SizedBox(height: 20),
