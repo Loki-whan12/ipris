@@ -19,13 +19,22 @@ class SubmitFeedbackState extends State<SubmitFeedback> {
   bool _isSaving = false;
 
   void _showSaveConfirmationDialog() {
+    // Check if all fields are filled
+    if (_subjectController.text.isEmpty ||
+        _messageController.text.isEmpty ||
+        _rating == 0) {
+      _showErrorDialog(
+          'Please fill in all fields and provide a rating before submitting.');
+      return; // Exit the function if fields are not filled
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Save Review'),
           content:
-              const Text('Are you sure you want to send the following rewiew?'),
+              const Text('Are you sure you want to send the following review?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -94,14 +103,14 @@ class SubmitFeedbackState extends State<SubmitFeedback> {
           _isSaving = false;
         });
         _showErrorDialog(
-            "An Error occured\nYou can try to upload the review again\nBear with us as we work to resolve it");
+            "An Error occurred\nYou can try to upload the review again\nBear with us as we work to resolve it");
       }
     } catch (e) {
       setState(() {
         _isSaving = false;
       });
       _showErrorDialog(
-          "An error has occured\nDo not worry the issue is from our side!\nWe are resolving it bear with us...");
+          "An error has occurred\nDo not worry the issue is from our side!\nWe are resolving it, bear with us...");
     }
   }
 
