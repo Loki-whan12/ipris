@@ -395,12 +395,12 @@ class _ScanPageState extends State<ScanPage> {
                               ),
                               const SizedBox(height: 10),
                               const SizedBox(height: 10),
-                              _buildElevatedButton(
-                                context,
-                                onPressed: () => pickDefaultImage(context),
-                                icon: Icons.photo_size_select_actual_rounded,
-                                text: "Default",
-                              ),
+                              // _buildElevatedButton(
+                              //   context,
+                              //   onPressed: () => pickDefaultImage(context),
+                              //   icon: Icons.photo_size_select_actual_rounded,
+                              //   text: "Default",
+                              // ),
                               const SizedBox(height: 10),
                               _buildElevatedButton(
                                 context,
