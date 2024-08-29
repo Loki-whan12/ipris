@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/backen_services.dart';
 import '../login.dart';
@@ -34,6 +35,13 @@ class _ChangePassword extends State<ChangePassword> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
+  bool validatePassword(String password) {
+    // Validate password with regex: min 8 characters, 1 letter, 1 number, 1 special character
+    final regex =
+        RegExp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
+    return regex.hasMatch(password);
+  }
+
   Future<void> updatePassword() async {
     var box = widget.box;
     Map updateAppProps = box.get("appProps");
@@ -49,33 +57,30 @@ class _ChangePassword extends State<ChangePassword> {
       displayError("Sorry, please enter your new password!");
     } else if (confirmPassword.isEmpty) {
       displayError("Sorry, confirm new password field cannot be empty!");
+    } else if (!validatePassword(newPassword)) {
+      displayError(
+          "New password must be at least 8 characters long and include a letter, number, and special character!");
+    } else if (databasePassword != currentPassword) {
+      setState(() {
+        loading = false;
+        error = "Sorry, your current password is incorrect!";
+      });
+    } else if (newPassword != confirmPassword) {
+      setState(() {
+        loading = false;
+        error = "Sorry, your new passwords don't match!";
+      });
+    } else if (newPassword == currentPassword) {
+      setState(() {
+        loading = false;
+        error =
+            "Sorry, your new password is the same as the old one. Try again!";
+      });
     } else {
-      if (databasePassword != currentPassword) {
-        setState(() {
-          loading = false;
-          error = "Sorry, your current password is wrong!";
-        });
-      } else {
-        if (newPassword != confirmPassword) {
-          setState(() {
-            loading = false;
-            error = "Sorry, your new passwords dont't match!";
-          });
-        } else {
-          if (newPassword == currentPassword) {
-            setState(() {
-              loading = false;
-              error =
-                  "Sorry, your new password is the same as the old one, Try again!";
-            });
-          } else {
-            Map body = {
-              "password": newPassword,
-            };
-            showWarningDialog(username, body);
-          }
-        }
-      }
+      Map body = {
+        "password": newPassword,
+      };
+      showWarningDialog(username, body);
     }
   }
 
@@ -87,7 +92,7 @@ class _ChangePassword extends State<ChangePassword> {
           return AlertDialog(
             title: const Text("Warning!"),
             content: const Text(
-                "You would be redirected to the login screen once you change your email or password!"),
+                "You will be redirected to the login screen once you change your email or password!"),
             actions: [
               ElevatedButton(
                   onPressed: () {
@@ -112,9 +117,14 @@ class _ChangePassword extends State<ChangePassword> {
   }
 
   Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
     var box = widget.box;
+
     Map updateAppProps = box.get("appProps");
     updateAppProps['isLoggedIn'] = false;
+    await widget.box.put('isLoggedIn', false);
+    prefs.setBool('isLoggedIn', false);
+
     await box.put('appProps', updateAppProps).whenComplete(() {
       Navigator.pushReplacement(
           context,
