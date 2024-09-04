@@ -15,6 +15,7 @@ import '../componenets/bottom_nav.dart';
 import '../componenets/drawer.dart';
 import '../componenets/floating_action_button.dart';
 import 'scan/results.dart';
+import 'search_results.dart';
 
 class HomeScreen extends StatefulWidget {
   final ThemeMode currentTheme;
@@ -38,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<bool> isLoadingList = [false, false, false];
   bool _isDropdownVisible = false;
+  TextEditingController _searchController = TextEditingController();
+  bool _showSearchButton = false;
 
   void _toggleDropdown() {
     setState(() {
@@ -45,10 +48,46 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _onSearchTextChanged() {
+    setState(() {
+      _showSearchButton = _searchController.text.length >= 4;
+    });
+  }
+
+  void _searchForPlant() {
+    final query = _searchController.text;
+    if (_showSearchButton) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SearchReults(
+            plantName: query,
+            currentTheme: widget.currentTheme,
+            onThemeChanged: widget.onThemeChanged,
+            box: widget.box,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     initializeData();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _showSearchButton = _searchController.text.length >= 4;
+    });
   }
 
   Future<void> initializeData() async {
@@ -128,6 +167,39 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 HomeScreenHeader(username: _name),
                 const Divider(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      labelText: 'Search for a plant',
+                      labelStyle: TextStyle(color: Colors.grey[700]),
+                      suffixIcon: _showSearchButton
+                          ? IconButton(
+                              icon:
+                                  const Icon(Icons.search, color: Colors.green),
+                              onPressed: _searchForPlant,
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: const BorderSide(color: Colors.transparent),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            const BorderSide(color: Colors.green, width: 2.0),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                    ),
+                  ),
+                ),
                 myHeightSpacer(20),
                 titleForSubComponents("Discover the app..."),
                 myHeightSpacer(10),

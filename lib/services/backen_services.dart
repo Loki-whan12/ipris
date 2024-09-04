@@ -11,6 +11,23 @@ class MyBackendService {
   final link = "https://ipris-backend.onrender.com";
   final headers = {'Content-Type': 'application/json'};
 
+  Future<Uint8List?> downloadImage(String imageUrl) async {
+    try {
+      // Perform a GET request to download the image
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        // Return image bytes
+        return response.bodyBytes;
+      } else {
+        print("Failed to download image: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("Error downloading image: $e");
+      return null;
+    }
+  }
+
   Future<dynamic> getUserInfo(String username) async {
     Uri url = Uri.parse("$link/users/$username");
     var request = http.Request('GET', url);
@@ -24,9 +41,79 @@ class MyBackendService {
     }
   }
 
+  Future<dynamic> checkIfPlant(Uint8List imageBytes) async {
+    final Uri url = Uri.parse("http://172.20.10.5:5000/plants/check-if-plant/");
+
+    var request = http.MultipartRequest('POST', url)
+      ..files.add(
+        http.MultipartFile.fromBytes('file', imageBytes, filename: 'image.jpg'),
+      );
+
+    try {
+      final response = await request.send();
+      if (response.statusCode == 201) {
+        final responseData = await response.stream.bytesToString();
+        final result = jsonDecode(responseData);
+        return result;
+      } else {
+        return 'Failed to upload image. Status code: ${response.statusCode}';
+      }
+    } catch (e) {
+      return 'Error uploading image: $e';
+    }
+  }
+
+  Future<Map<String, dynamic>> retrieveIdentification(
+      String accessToken) async {
+    var headers = {
+      'Api-Key': 'UkHbVLhjJdclBee9wJX27168ZowiEatUDySw9Jg1ToL98D2uN8',
+      'Content-Type': 'application/json',
+    };
+
+    var request = http.Request(
+      'GET',
+      Uri.parse(
+        'https://plant.id/api/v3/kb/plants/$accessToken?details=common_names,url,description,taxonomy,rank,gbif_id,inaturalist_id,image,synonyms,edible_parts,watering&language=en',
+      ),
+    );
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    // Convert response stream to string and then to JSON
+    String responseBody = await response.stream.bytesToString();
+    Map<String, dynamic> data = json.decode(responseBody);
+    // Check if 'plant' key exists and return data accordingly
+
+    return data;
+  }
+
+  Future getPlantsByName(String plantName) async {
+    var headers = {
+      'Api-Key': 'UkHbVLhjJdclBee9wJX27168ZowiEatUDySw9Jg1ToL98D2uN8',
+      'Content-Type': 'application/json'
+    };
+    var request = http.Request(
+        'GET',
+        Uri.parse(
+            'https://plant.id/api/v3/kb/plants/name_search?q=$plantName&thumbnails=true'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var data = await response.stream.bytesToString();
+      return jsonDecode(data);
+    } else {
+      return response.reasonPhrase;
+    }
+  }
+
   Future<dynamic> identifyPlant(Uint8List bytes, String filename) async {
     var headers = {
-      'Api-Key': 'NVOQ06FFhwbHBjlEi54WjwcJA2wXKL2w5ygGyuGVxrfQ1MAbkF',
+      'Api-Key': 'UkHbVLhjJdclBee9wJX27168ZowiEatUDySw9Jg1ToL98D2uN8',
       'Content-Type': 'multipart/form-data'
     };
     var request = http.MultipartRequest(

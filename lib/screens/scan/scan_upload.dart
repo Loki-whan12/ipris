@@ -98,7 +98,52 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
+  Future<void> handleImageFromGallery(
+      Uint8List bytes, BuildContext context) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final checkResponse = await MyBackendService().checkIfPlant(bytes);
+      print('CheckIfPlant response: $checkResponse');
+
+      await _processPlantResponse(checkResponse, bytes, context);
+    } on PlatformException catch (e) {
+      _showErrorDialog(context, 'Failed to pick image: ${e.message}');
+    } catch (e) {
+      _showErrorDialog(context, 'Error occurred: ${e.toString()}');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   Future<void> handleImageFromCamera(
+      Uint8List bytes, BuildContext context) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final checkResponse = await MyBackendService().checkIfPlant(bytes);
+      print('CheckIfPlant response: $checkResponse');
+
+      await _processPlantResponse(checkResponse, bytes, context);
+    } on PlatformException catch (e) {
+      _showErrorDialog(context, 'Failed to pick image: ${e.message}');
+    } catch (e) {
+      _showErrorDialog(context, 'Error occurred: ${e.toString()}');
+    } finally {
+      setState(() {
+        isLoading = false;
+        _isCameraViewVisible = false;
+      });
+    }
+  }
+
+  Future<void> handleImageFromCameraaa(
       Uint8List bytes, BuildContext context) async {
     setState(() {
       isLoading = true;
@@ -156,67 +201,80 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
+  Future<void> _processPlantResponse(
+    Map<String, dynamic> checkResponse,
+    Uint8List bytes,
+    BuildContext context,
+  ) async {
+    if (checkResponse.containsKey('result')) {
+      if (checkResponse['result'] == 0) {
+        // Image contains a plant, now identify the plant and get uses
+        final identifyResponse = await MyBackendService()
+            .identifyPlantAndGetUses(bytes, "filename.jpg");
+
+        if (identifyResponse is Map &&
+            identifyResponse.containsKey('message') &&
+            identifyResponse['message'] == 'success') {
+          if (identifyResponse['plant_info']['result']['is_plant']['binary'] ==
+              false) {
+            _showErrorDialog(
+              context,
+              "The image does not contain a plant. Please try again with a different image.",
+            );
+          } else {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ResultsScreen(
+                  imageBytes: bytes,
+                  box: widget.box,
+                  currentTheme: widget.currentTheme,
+                  onThemeChanged: widget.onThemeChanged,
+                  showButtonsOfScanScreen: true,
+                  plantInfo: identifyResponse['plant_info'] ?? {},
+                  plantUses:
+                      identifyResponse['plant_uses']?['plant_uses'] ?? {},
+                ),
+              ),
+            );
+          }
+        } else if (identifyResponse.containsKey('error')) {
+          _showErrorDialog(context, identifyResponse['error']);
+        } else {
+          _showErrorDialog(context, "Unexpected response format");
+        }
+      } else if (checkResponse['result'] == 1) {
+        _showErrorDialog(
+          context,
+          "The image does not contain a plant. Please upload an image with a plant.",
+        );
+      } else {
+        _showErrorDialog(context, "Unexpected result from the backend.");
+      }
+    } else if (checkResponse.containsKey('error')) {
+      _showErrorDialog(context, checkResponse['error']);
+    } else {
+      _showErrorDialog(context, "Unsupported image format detected");
+    }
+  }
+
   Future<void> handleImage(Uint8List bytes, BuildContext context) async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      final response = await MyBackendService()
-          .identifyPlantAndGetUses(bytes, "filename.jpg");
+      final checkResponse = await MyBackendService().checkIfPlant(bytes);
+      print('CheckIfPlant response: $checkResponse');
 
-      if (response is Map &&
-          response.containsKey('message') &&
-          response['message'] == 'success') {
-        if (response['plant_info']['result']['is_plant']['binary'] == false) {
-          setState(() {
-            isLoading = false;
-            _showErrorDialog(context,
-                "The image does not contain a plant. Please try again with a different image.");
-          });
-        } else {
-          setState(() {
-            isLoading = false;
-          });
-          print(response['plant_uses']);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ResultsScreen(
-                imageBytes: bytes,
-                box: widget.box,
-                currentTheme: widget.currentTheme,
-                onThemeChanged: widget.onThemeChanged,
-                showButtonsOfScanScreen: true,
-                plantInfo: response['plant_info'],
-                plantUses: response['plant_uses']?['plant_uses'] ?? {},
-              ),
-            ),
-          );
-        }
-        setState(() {
-          isLoading = false;
-        });
-      } else if (response is Map && response.containsKey('error')) {
-        setState(() {
-          isLoading = false;
-          _showErrorDialog(context, response['error']);
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-          _showErrorSnackbar(context, "Unsupported image format detected");
-        });
-      }
+      await _processPlantResponse(checkResponse, bytes, context);
     } on PlatformException catch (e) {
-      setState(() {
-        isLoading = false;
-        _showErrorSnackbar(context, "Failed to pick image: ${e.message}");
-      });
+      _showErrorDialog(context, 'Failed to pick image: ${e.message}');
     } catch (e) {
+      _showErrorDialog(context, 'Error occurred: ${e.toString()}');
+    } finally {
       setState(() {
         isLoading = false;
-        _showErrorSnackbar(context, "Error occurred: ${e.toString()}");
       });
     }
   }
@@ -395,12 +453,12 @@ class _ScanPageState extends State<ScanPage> {
                               ),
                               const SizedBox(height: 10),
                               const SizedBox(height: 10),
-                              // _buildElevatedButton(
-                              //   context,
-                              //   onPressed: () => pickDefaultImage(context),
-                              //   icon: Icons.photo_size_select_actual_rounded,
-                              //   text: "Default",
-                              // ),
+                              _buildElevatedButton(
+                                context,
+                                onPressed: () => pickDefaultImage(context),
+                                icon: Icons.photo_size_select_actual_rounded,
+                                text: "Default",
+                              ),
                               const SizedBox(height: 10),
                               _buildElevatedButton(
                                 context,
