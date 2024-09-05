@@ -61,6 +61,7 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
+  //to capture an image with camera
   Future<void> _takePicture(BuildContext context) async {
     try {
       setState(() {
@@ -120,6 +121,7 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
+  //handling the image from camera
   Future<void> handleImageFromCamera(
       Uint8List bytes, BuildContext context) async {
     setState(() {
@@ -127,10 +129,44 @@ class _ScanPageState extends State<ScanPage> {
     });
 
     try {
-      final checkResponse = await MyBackendService().checkIfPlant(bytes);
-      print('CheckIfPlant response: $checkResponse');
+      // final checkResponse = await MyBackendService().checkIfPlant(bytes);
+      // print('CheckIfPlant response: $checkResponse');
 
-      await _processPlantResponse(checkResponse, bytes, context);
+      // await _processPlantResponse(checkResponse, bytes, context);
+
+      //route to check to see if Image contains plant
+      final checkIfPlantResponse = await MyBackendService().checkIfPlant(bytes);
+
+      //first check the response from MyBackendService().checkIfPlant(bytes);
+      if (checkIfPlantResponse != null && checkIfPlantResponse is Map) {
+        if (checkIfPlantResponse.containsKey("result")) {
+          if (!(checkIfPlantResponse['result'] == "Not a plant")) {
+            _showErrorDialog(context, "The image contains a plant");
+          } else {
+            //the image is not a plant
+            setState(() {
+              isLoading = false;
+            });
+            _showErrorDialog(context,
+                "The image does not contain a plant. Please try again with a different image.");
+          }
+        } else if (checkIfPlantResponse.containsKey("error")) {
+          setState(() {
+            isLoading = false;
+          });
+          //check if the error is the key.
+          _showErrorDialog(context, checkIfPlantResponse['error'].toString());
+        }
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        // network error and not able to check if plant or not...
+        _showErrorDialog(context, 'Sorry, your network connection is unstable');
+      }
+      //end for checking is plant ...
+
+//end for camera  code.....
     } on PlatformException catch (e) {
       _showErrorDialog(context, 'Failed to pick image: ${e.message}');
     } catch (e) {
@@ -264,10 +300,40 @@ class _ScanPageState extends State<ScanPage> {
     });
 
     try {
-      final checkResponse = await MyBackendService().checkIfPlant(bytes);
-      print('CheckIfPlant response: $checkResponse');
+      //route to check to see if Image contains plant
+      final checkIfPlantResponse = await MyBackendService().checkIfPlant(bytes);
 
-      await _processPlantResponse(checkResponse, bytes, context);
+      //first check the response from MyBackendService().checkIfPlant(bytes);
+      if (checkIfPlantResponse != null && checkIfPlantResponse is Map) {
+        if (checkIfPlantResponse.containsKey("result")) {
+          if (!(checkIfPlantResponse['result'] == "Not a plant")) {
+            setState(() {
+              isLoading = false;
+            });
+            _showErrorDialog(context, "The image contains a plant");
+          } else {
+            //the image is not a plant
+            setState(() {
+              isLoading = false;
+            });
+            _showErrorDialog(context,
+                "The image does not contain a plant. Please try again with a different image.");
+          }
+        } else if (checkIfPlantResponse.containsKey("error")) {
+          setState(() {
+            isLoading = false;
+          });
+          //check if the error is the key.
+          _showErrorDialog(context, checkIfPlantResponse['error'].toString());
+        }
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        // network error and not able to check if plant or not...
+        _showErrorDialog(context, 'Sorry, your network connection is unstable');
+      }
+      //end for checking is plant ...
     } on PlatformException catch (e) {
       _showErrorDialog(context, 'Failed to pick image: ${e.message}');
     } catch (e) {
@@ -277,10 +343,25 @@ class _ScanPageState extends State<ScanPage> {
         isLoading = false;
       });
     }
+
+    // try {
+    //   final checkResponse = await MyBackendService().checkIfPlant(bytes);
+    //   print('CheckIfPlant response: $checkResponse');
+
+    //   // await _processPlantResponse(checkResponse, bytes, context);
+    // } on PlatformException catch (e) {
+    //   _showErrorDialog(context, 'Failed to pick image: ${e.message}');
+    // } catch (e) {
+    //   _showErrorDialog(context, 'Error occurred: ${e.toString()}');
+    // } finally {
+    //   setState(() {
+    //     isLoading = false;
+    //   });
+    // }
   }
 
   Future<void> pickDefaultImage(BuildContext context) async {
-    const imagePath = 'assets/imgs/imgss.jpg';
+    const imagePath = 'assets/imgs/eor.jpg';
     final bytes = await rootBundle.load(imagePath);
     handleImage(bytes.buffer.asUint8List(), context);
   }
@@ -346,53 +427,92 @@ class _ScanPageState extends State<ScanPage> {
 
       final bytes = await imageTemporary.readAsBytes();
 
-      final response = await MyBackendService()
-          .identifyPlantAndGetUses(bytes, "filename.jpg")
-          .whenComplete(() {
+      // final response = await MyBackendService()
+      //     .identifyPlantAndGetUses(bytes, "filename.jpg")
+      //     .whenComplete(() {
+      //   setState(() {
+      //     isLoading = false;
+      //   });
+      // });
+
+      //route to check to see if Image contains plant
+      final checkIfPlantResponse = await MyBackendService().checkIfPlant(bytes);
+
+      //first check the response from MyBackendService().checkIfPlant(bytes);
+      if (checkIfPlantResponse != null && checkIfPlantResponse is Map) {
+        if (checkIfPlantResponse.containsKey("result")) {
+          if (!(checkIfPlantResponse['result'] == "Not a plant")) {
+            // if (response != null && response is Map) {
+            //   if (response.containsKey('message') &&
+            //       response['message'] == 'success') {
+            //     if (response['plant_info'] != null &&
+            //         response['plant_info']['result'] != null &&
+            //         response['plant_info']['result']['is_plant'] != null &&
+            //         response['plant_info']['result']['is_plant']['binary'] !=
+            //             null &&
+            //         response['plant_info']['result']['is_plant']['binary'] ==
+            //             false) {
+            //       _showErrorDialog(context,
+            //           "The image does not contain a plant. Please try again with a different image.");
+            //     } else {
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //           builder: (context) => ResultsScreen(
+            //             imageBytes: bytes,
+            //             box: widget.box,
+            //             currentTheme: widget.currentTheme,
+            //             onThemeChanged: widget.onThemeChanged,
+            //             showButtonsOfScanScreen: true,
+            //             plantInfo: response['plant_info'] ?? {},
+            //             plantUses: response['plant_uses']?['plant_uses'] ?? {},
+            //           ),
+            //         ),
+            //       );
+            //     }
+            //   } else if (response.containsKey('error')) {
+            //     setState(() {
+            //       isLoading = false;
+            //     });
+            //     _showErrorDialog(context, response['error']);
+            //   } else {
+            //     setState(() {
+            //       isLoading = false;
+            //     });
+            //     // Handle unexpected response format
+            //     _showErrorDialog(context, "Unexpected response format");
+            //   }
+            // } else {
+            //   // Handle null or unexpected response
+            //   _showErrorDialog(context, "Unexpected or null response");
+            // }
+            // setState(() {
+            //   isLoading = false;
+            // });
+            // //end of plant.id checking
+          } else {
+            //the image is not a plant
+            setState(() {
+              isLoading = false;
+            });
+            _showErrorDialog(context,
+                "The image does not contain a plant. Please try again with a different image.");
+          }
+        } else if (checkIfPlantResponse.containsKey("error")) {
+          setState(() {
+            isLoading = false;
+          });
+          //check if the error is the key.
+          _showErrorDialog(context, checkIfPlantResponse['error'].toString());
+        }
+      } else {
         setState(() {
           isLoading = false;
         });
-      });
-
-      if (response != null && response is Map) {
-        if (response.containsKey('message') &&
-            response['message'] == 'success') {
-          if (response['plant_info'] != null &&
-              response['plant_info']['result'] != null &&
-              response['plant_info']['result']['is_plant'] != null &&
-              response['plant_info']['result']['is_plant']['binary'] != null &&
-              response['plant_info']['result']['is_plant']['binary'] == false) {
-            _showErrorDialog(context,
-                "The image does not contain a plant. Please try again with a different image.");
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ResultsScreen(
-                  imageBytes: bytes,
-                  box: widget.box,
-                  currentTheme: widget.currentTheme,
-                  onThemeChanged: widget.onThemeChanged,
-                  showButtonsOfScanScreen: true,
-                  plantInfo: response['plant_info'] ?? {},
-                  plantUses: response['plant_uses']?['plant_uses'] ?? {},
-                ),
-              ),
-            );
-          }
-        } else if (response.containsKey('error')) {
-          _showErrorDialog(context, response['error']);
-        } else {
-          // Handle unexpected response format
-          _showErrorDialog(context, "Unexpected response format");
-        }
-      } else {
-        // Handle null or unexpected response
-        _showErrorDialog(context, "Unexpected or null response");
+        // network error and not able to check if plant or not...
+        _showErrorDialog(context, 'Sorry, your network connection is unstable');
       }
-      setState(() {
-        isLoading = false;
-      });
+      //end for checking is plant ...
     } on PlatformException catch (e) {
       _showErrorDialog(context, 'Failed to pick image');
       setState(() {
@@ -403,12 +523,15 @@ class _ScanPageState extends State<ScanPage> {
         isLoading = false;
       });
       _showErrorDialog(context, 'Error occurred');
-      // Handle unexpected errors here
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    return buildScanPageScreen(context);
+  }
+
+  Scaffold buildScanPageScreen(BuildContext context) {
     return Scaffold(
       appBar: _isCameraViewVisible
           ? null

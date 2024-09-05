@@ -42,16 +42,25 @@ class MyBackendService {
   }
 
   Future<dynamic> checkIfPlant(Uint8List imageBytes) async {
-    final Uri url = Uri.parse("http://172.20.10.5:5000/plants/check-if-plant/");
+    // Removed Content-Type header as it is set automatically by MultipartRequest
+    var request = http.MultipartRequest(
+        'POST', Uri.parse("http://192.168.0.169:5000/plants/check-if-plant/"));
 
-    var request = http.MultipartRequest('POST', url)
-      ..files.add(
-        http.MultipartFile.fromBytes('file', imageBytes, filename: 'image.jpg'),
-      );
+    // Create the multipart file
+    var myFile = http.MultipartFile.fromBytes(
+      "file",
+      imageBytes,
+      filename: 'filename',
+      contentType: MediaType('image', 'jpeg'), // specify content type if known
+    );
+
+    // Add the file to the request
+    request.files.add(myFile);
 
     try {
       final response = await request.send();
       if (response.statusCode == 201) {
+        // Ensure the status code matches the backend
         final responseData = await response.stream.bytesToString();
         final result = jsonDecode(responseData);
         return result;
